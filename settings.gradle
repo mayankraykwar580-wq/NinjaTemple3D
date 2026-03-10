@@ -1,0 +1,2 @@
+rootProject.name = "NinjaTemple3D"
+include ':app'
