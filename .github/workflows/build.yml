@@ -19,6 +19,12 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v2
 
+    - name: Embed Three.js offline
+      run: |
+        curl -o /tmp/three.min.js https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js
+        THREE_JS=$(cat /tmp/three.min.js)
+        sed -i 's|<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>|<script>'"$THREE_JS"'</script>|g' app/src/main/assets/game.html
+
     - name: Generate gradlew
       run: |
         gradle wrapper --gradle-version 8.4
