@@ -1,40 +1,15 @@
-name: Build APK
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
-
-    - name: Embed Three.js offline
+name: Embed Three.js offline
       run: |
         curl -o /tmp/three.min.js https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js
-        THREE_JS=$(cat /tmp/three.min.js)
-        sed -i 's|<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>|<script>'"$THREE_JS"'</script>|g' app/src/main/assets/game.html
-
-    - name: Generate gradlew
-      run: |
-        gradle wrapper --gradle-version 8.4
-        chmod +x gradlew
-    
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
-    
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: NinjaTemple3D-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+        python3 -c "
+        with open('/tmp/three.min.js', 'r') as f:
+            three = f.read()
+        with open('app/src/main/assets/game.html', 'r') as f:
+            html = f.read()
+        old = '<script src=\"https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js\"></script>'
+        new = '<script>' + three + '</script>'
+        html = html.replace(old, new)
+        with open('app/src/main/assets/game.html', 'w') as f:
+            f.write(html)
+        print('Done!')
+        "
